@@ -77,6 +77,19 @@ def _check_dir(path: Path, label: str) -> bool:
     return False
 
 
+def _check_output_dir_setting(path: Path, label: str) -> bool:
+    """Check the output folder parent without requiring data files in Git."""
+
+    if path.is_dir():
+        _ok(f"{label}: {path}")
+        return True
+    if path.parent.is_dir():
+        _ok(f"{label} will be created when needed: {path}")
+        return True
+    _fail(f"{label} parent missing: {path.parent}")
+    return False
+
+
 def _check_json(path: Path, label: str, expected_type: type) -> bool:
     if not _check_file(path, label):
         return False
@@ -149,7 +162,7 @@ def main(argv: list[str] | None = None) -> int:
 
     passed = _check_dir(SRC_DIR, "Source directory") and passed
     passed = _check_dir(DEFAULT_CONFIG_DIR, "Config directory") and passed
-    passed = _check_dir(DEFAULT_DATA_DIR, "Data directory") and passed
+    passed = _check_output_dir_setting(DEFAULT_DATA_DIR, "Data directory") and passed
 
     passed = _check_json(DEFAULT_STIMULI_JSON, "Stimuli config", list) and passed
     passed = _check_json(DEFAULT_MS_STIMULI_JSON, "Main study stimuli config", list) and passed
