@@ -1,0 +1,36 @@
+# Secrets
+.env
+
+# Python
+__pycache__/
+.pytest_cache/
+*.pyc
+*.pyo
+.venv/
+*.egg-info/
+build/
+dist/
+
+# Local output and generated files
+*.log
+figures/
+test-output/
+
+# Study data
+data/*
+!data/.gitkeep
+!data/raw/
+!data/processed/
+!data/external/
+data/raw/*
+data/processed/*
+data/external/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/external/.gitkeep
+
+# OS and editor noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
