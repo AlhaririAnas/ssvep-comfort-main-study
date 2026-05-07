@@ -1,0 +1,296 @@
+{
+  "schema_version": "main_study_proband_v2",
+  "pre_flight_compliance": [
+    {
+      "key": "consent_confirmed",
+      "label": "Written consent is confirmed",
+      "required": true
+    },
+    {
+      "key": "phone_airplane_mode",
+      "label": "Phone is in airplane mode",
+      "required": true
+    },
+    {
+      "key": "watch_removed",
+      "label": "Smartwatch is removed or off",
+      "required": false
+    },
+    {
+      "key": "room_light_ok",
+      "label": "Room light is stable and not flickering",
+      "required": true
+    },
+    {
+      "key": "screen_brightness_ok",
+      "label": "Screen brightness is set to the planned level",
+      "required": true
+    },
+    {
+      "key": "display_refresh_60hz_confirmed",
+      "label": "Display refresh rate is set to 60 Hz",
+      "required": true
+    },
+    {
+      "key": "night_light_off",
+      "label": "Night light or blue-light filter is off",
+      "required": true
+    },
+    {
+      "key": "adaptive_display_off",
+      "label": "HDR and automatic brightness are off",
+      "required": true
+    },
+    {
+      "key": "screen_distance_ok",
+      "label": "Viewing distance was measured and set",
+      "required": true
+    },
+    {
+      "key": "proband_centered",
+      "label": "Participant is seated comfortably and centered",
+      "required": true
+    },
+    {
+      "key": "proband_can_stop",
+      "label": "Participant knows they can pause or stop at any time",
+      "required": true
+    },
+    {
+      "key": "proband_ready",
+      "label": "Participant is ready",
+      "required": true
+    }
+  ],
+  "q1_trait": {
+    "title": "Participant info",
+    "fields": [
+      {
+        "key": "age_years",
+        "label": "Age",
+        "type": "int",
+        "min": 18,
+        "max": 99
+      },
+      {
+        "key": "sex",
+        "label": "Sex",
+        "type": "choice",
+        "choices": ["prefer not to say", "female", "male", "diverse"]
+      },
+      {
+        "key": "handedness",
+        "label": "Handedness",
+        "type": "choice",
+        "choices": ["right", "left", "both", "prefer not to say"]
+      },
+      {
+        "key": "visual_aid",
+        "label": "Visual aid used today",
+        "type": "choice",
+        "choices": ["none", "glasses", "contact lenses", "both", "other"]
+      },
+      {
+        "key": "normal_or_corrected_vision",
+        "label": "Normal or corrected-to-normal vision",
+        "type": "bool"
+      },
+      {
+        "key": "uncorrected_vision_problem",
+        "label": "Vision problem not corrected today",
+        "type": "bool"
+      },
+      {
+        "key": "color_vision_problem",
+        "label": "Known color vision problem",
+        "type": "bool"
+      },
+      {
+        "key": "epilepsy_history",
+        "label": "History of epilepsy or seizures",
+        "type": "bool"
+      },
+      {
+        "key": "photosensitive_reaction",
+        "label": "Strong reaction to flicker or flashing light before",
+        "type": "bool"
+      },
+      {
+        "key": "neurological_condition",
+        "label": "Neurological condition that may affect EEG or attention",
+        "type": "bool"
+      },
+      {
+        "key": "migraine_or_light_sensitive_headache",
+        "label": "Migraine or light-sensitive headache history",
+        "type": "bool"
+      },
+      {
+        "key": "medication_affects_attention",
+        "label": "Medication that may affect attention or EEG",
+        "type": "bool"
+      }
+    ]
+  },
+  "q2_state": {
+    "title": "Current state",
+    "fields": [
+      {
+        "key": "sleep_hours_last_night",
+        "label": "Sleep last night in hours",
+        "type": "float",
+        "min": 0,
+        "max": 14
+      },
+      {
+        "key": "sleep_quality",
+        "label": "Sleep quality from 0 to 6",
+        "type": "int",
+        "min": 0,
+        "max": 6
+      },
+      {
+        "key": "fatigue_level",
+        "label": "Fatigue from 0 to 6",
+        "type": "int",
+        "min": 0,
+        "max": 6
+      },
+      {
+        "key": "alertness_level",
+        "label": "Alertness from 0 to 6",
+        "type": "int",
+        "min": 0,
+        "max": 6
+      },
+      {
+        "key": "stress_level",
+        "label": "Stress from 0 to 6",
+        "type": "int",
+        "min": 0,
+        "max": 6
+      },
+      {
+        "key": "current_headache",
+        "label": "Headache right now",
+        "type": "bool"
+      },
+      {
+        "key": "current_eye_strain",
+        "label": "Eye strain right now",
+        "type": "bool"
+      },
+      {
+        "key": "caffeine_last_4h",
+        "label": "Caffeine in last 4 hours",
+        "type": "bool"
+      },
+      {
+        "key": "alcohol_last_12h",
+        "label": "Alcohol in last 12 hours",
+        "type": "bool"
+      },
+      {
+        "key": "attention_medication_today",
+        "label": "Medication today that may affect attention",
+        "type": "bool"
+      },
+      {
+        "key": "screen_use_last_hour",
+        "label": "Long screen use in the last hour",
+        "type": "bool"
+      }
+    ]
+  },
+  "q3_environment": {
+    "title": "Room",
+    "fields": [
+      {
+        "key": "lighting_level",
+        "label": "Room light level from 0 to 6",
+        "type": "int",
+        "min": 0,
+        "max": 6
+      },
+      {
+        "key": "lighting_stable",
+        "label": "Room light stayed stable during setup",
+        "type": "bool"
+      },
+      {
+        "key": "screen_distance_cm",
+        "label": "Screen distance in cm",
+        "type": "float",
+        "min": 30,
+        "max": 150
+      },
+      {
+        "key": "screen_brightness_percent",
+        "label": "Screen brightness in percent",
+        "type": "int",
+        "min": 0,
+        "max": 100
+      },
+      {
+        "key": "screen_contrast_percent",
+        "label": "Screen contrast in percent",
+        "type": "int",
+        "min": 0,
+        "max": 100
+      },
+      {
+        "key": "display_refresh_rate_hz",
+        "label": "Display refresh rate in Hz",
+        "type": "int",
+        "min": 30,
+        "max": 240
+      },
+      {
+        "key": "noise_level",
+        "label": "Noise level from 0 to 6",
+        "type": "int",
+        "min": 0,
+        "max": 6
+      },
+      {
+        "key": "room_temperature_c",
+        "label": "Room temperature (degree C)",
+        "type": "float",
+        "min": 10,
+        "max": 35,
+        "optional": true
+      },
+      {
+        "key": "interruptions_expected",
+        "label": "Interruptions expected during the session",
+        "type": "bool"
+      },
+      {
+        "key": "room_notes",
+        "label": "Room notes",
+        "type": "text",
+        "optional": true
+      }
+    ]
+  },
+  "post_session": {
+    "title": "After session",
+    "fields": [
+      {
+        "key": "favorite_stimulus",
+        "label": "Favorite stimulus",
+        "type": "text",
+        "optional": true
+      }
+    ]
+  },
+  "exclusion_criteria": {
+    "hard": [
+      "uncorrected_vision_problem",
+      "epilepsy_history",
+      "photosensitive_reaction",
+      "neurological_condition"
+    ]
+  }
+}
+
