@@ -28,8 +28,6 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 if __name__ == "__main__":  # pragma: no cover - supports direct module demos
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from psychopy import core, event, gui, visual
-
 from core.conditions import (
     CONDITION_SCHEMA_VERSION,
     assign_condition_ids,
@@ -43,7 +41,6 @@ from acquisition.impedance import ImpedanceMonitor, run_impedance_gate
 from acquisition.marker import Marker
 from acquisition.recording import CortexRecording
 from acquisition.recovery import TrialConnectionLost, raise_if_disconnected, recover_after_disconnect
-from stimuli.generator import StimulusGenerator, build_fixation_stimuli, make_window, normalize_stimulus_cfg
 from core.config import (
     DEFAULT_PROBAND_ID,
     DEFAULT_OUT_DIR,
@@ -83,17 +80,6 @@ from data_io.writers import (
     append_csv_rows,
     save_session_outputs,
 )
-from stimuli.display import (
-    seconds_to_frames,
-    measure_refresh_rate,
-    check_escape,
-    draw_all,
-    show_fixation,
-    show_blank,
-    show_message,
-    make_info_stim,
-)
-
 # ---------------------------------------------------------------------------
 # Marker codes
 # ---------------------------------------------------------------------------
@@ -244,6 +230,8 @@ def _estimate_session_duration_min(
 def _collect_trial_count(default_value: int) -> int:
     """Show an editable runtime field for the trial count."""
 
+    from psychopy import gui  # type: ignore
+
     dlg = gui.Dlg(title=f"{PHASE_LABEL} - runtime settings")
     dlg.addText("Review and edit the session settings.")
     dlg.addField("Trials per stimulus", initial=int(default_value))
@@ -258,6 +246,8 @@ def _collect_trial_count(default_value: int) -> int:
 
 
 def _load_stimuli(path: str, pilot_ids: Optional[List[int]] = None) -> List[Dict[str, Any]]:
+    from stimuli.generator import normalize_stimulus_cfg
+
     if not os.path.isfile(path):
         raise FileNotFoundError(f"Stimuli-Konfiguration nicht gefunden: {path}")
     with open(path, "r", encoding="utf-8-sig") as fh:
@@ -470,6 +460,8 @@ def _run_countdown_screen(
     countdown_label: str = "Continue in",
     ready_text: str = "Press SPACE to continue.",
 ) -> bool:
+    from psychopy import core, event  # type: ignore
+
     event.clearEvents(eventType="keyboard")
     deadline = time.monotonic() + max(0.0, float(duration_s))
     while True:
@@ -508,6 +500,8 @@ def _stimulus_modulation_lines(
 
 class RatingDisplay:
     def __init__(self, win: visual.Window, language: str = "en") -> None:
+        from psychopy import visual  # type: ignore
+
         self.language = str(language).lower()
         self.header = visual.TextStim(win, units="height", color="white", height=0.038, pos=(0.0, 0.40), wrapWidth=1.55, alignText="center")
         self.question = visual.TextStim(win, units="height", color="white", height=0.048, pos=(0.0, 0.12), wrapWidth=1.35, alignText="center")
@@ -552,6 +546,8 @@ def _collect_ratings(
     stimulus_name: str,
     language: str = "en",
 ) -> Optional[List[Dict[str, Any]]]:
+    from psychopy import event  # type: ignore
+
     rating_ui.language = str(language).lower()
     rows: List[Dict[str, Any]] = []
     for item_idx, item in enumerate(COMFORT_ITEMS, start=1):
@@ -631,6 +627,8 @@ def _collect_environment_metadata() -> Dict[str, Any]:
     Returns a dict with the entered values.  If the user presses Cancel
     the defaults are returned (acts as 'skip').
     """
+    from psychopy import gui  # type: ignore
+
     fields = dict(ENVIRONMENT_METADATA_FIELDS)
 
     dlg = gui.Dlg(
@@ -667,6 +665,19 @@ def _collect_environment_metadata() -> Dict[str, Any]:
 
 
 def run_stimulus_screening(cfg: Dict[str, Any]) -> None:
+    from psychopy import core  # type: ignore
+    from stimuli.display import (
+        seconds_to_frames,
+        measure_refresh_rate,
+        check_escape,
+        draw_all,
+        show_fixation,
+        show_blank,
+        show_message,
+        make_info_stim,
+    )
+    from stimuli.generator import StimulusGenerator, build_fixation_stimuli, make_window
+
     marker: Optional[Marker] = None
     recording: Optional[CortexRecording] = None
     live: Optional[CortexLiveStream] = None

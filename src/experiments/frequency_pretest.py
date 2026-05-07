@@ -24,8 +24,6 @@ from typing import Any, Dict, Iterable, List, Optional
 if __name__ == "__main__":  # pragma: no cover - supports direct module demos
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from psychopy import core, gui, visual
-
 from core.config import (
     DEFAULT_PROBAND_ID,
     DEFAULT_OUT_DIR,
@@ -55,16 +53,6 @@ from data_io.writers import (
     safe_write_json,
     append_csv_rows,
 )
-from stimuli.display import (
-    seconds_to_frames,
-    estimate_realized_frequency,
-    check_escape,
-    draw_all,
-    show_fixation,
-    show_blank,
-    show_message,
-    make_info_stim,
-)
 from acquisition.live_stream import CortexLiveStream
 from acquisition.impedance import ImpedanceMonitor, run_impedance_gate
 from acquisition.marker import Marker
@@ -77,13 +65,6 @@ from core.conditions import (
     build_frequency_pretest_condition_spec,
     condition_marker_label,
 )
-from stimuli.generator import (
-    StimulusGenerator,
-    build_fixation_stimuli,
-    make_window,
-    measure_refresh_rate,
-)
-
 __all__ = ["run_frequency_pretest"]
 
 # ---------------------------------------------------------------------------
@@ -155,6 +136,8 @@ def _estimate_session_duration_min(
 
 def _collect_trial_count(default_value: int) -> int:
     """Show an editable runtime field for the trial count."""
+
+    from psychopy import gui  # type: ignore
 
     dlg = gui.Dlg(title=f"{PHASE_LABEL} - runtime settings")
     dlg.addText("Review and edit the session settings.")
@@ -310,6 +293,24 @@ def _schedule_marker(
 # Entry point
 # ---------------------------------------------------------------------------
 def run_frequency_pretest(cfg: Dict[str, Any]) -> None:
+    from psychopy import core  # type: ignore
+    from stimuli.display import (
+        seconds_to_frames,
+        estimate_realized_frequency,
+        check_escape,
+        draw_all,
+        show_fixation,
+        show_blank,
+        show_message,
+        make_info_stim,
+    )
+    from stimuli.generator import (
+        StimulusGenerator,
+        build_fixation_stimuli,
+        make_window,
+        measure_refresh_rate,
+    )
+
     marker: Optional[Marker] = None
     recording: Optional[CortexRecording] = None
     live: Optional[CortexLiveStream] = None
