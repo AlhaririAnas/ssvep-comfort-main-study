@@ -25,6 +25,16 @@ def _recovery_path(path: str | Path) -> Path:
     return target.with_name(f"{target.stem}.recovery_{stamp}{target.suffix}")
 
 
+def _write_json_file(data: Any, path: Path) -> None:
+    """Write one JSON file and flush it to disk."""
+
+    with path.open("w", encoding="utf-8") as file:
+        json.dump(data, file, indent=2, ensure_ascii=False, default=str)
+        file.write("\n")
+        file.flush()
+        os.fsync(file.fileno())
+
+
 def safe_write_json(
     data: Any,
     path: str | Path,
@@ -48,15 +58,20 @@ def safe_write_json(
     for attempt in range(1, retries + 1):
         tmp = target.with_suffix(target.suffix + f".tmp.{attempt}")
         try:
-            with tmp.open("w", encoding="utf-8") as file:
-                json.dump(data, file, indent=2, ensure_ascii=False, default=str)
-                file.write("\n")
-                file.flush()
-                os.fsync(file.fileno())
+            _write_json_file(data, tmp)
             os.replace(tmp, target)
             return target
         except PermissionError as exc:
             last_error = exc
+            try:
+                _write_json_file(data, target)
+                try:
+                    tmp.unlink(missing_ok=True)
+                except PermissionError:
+                    pass
+                return target
+            except PermissionError as direct_exc:
+                last_error = direct_exc
             if tmp.exists():
                 try:
                     tmp.unlink(missing_ok=True)
@@ -68,9 +83,7 @@ def safe_write_json(
             time.sleep(retry_delay_s)
 
     recovery = _recovery_path(target)
-    with recovery.open("w", encoding="utf-8") as file:
-        json.dump(data, file, indent=2, ensure_ascii=False, default=str)
-        file.write("\n")
+    _write_json_file(data, recovery)
     if logger is not None:
         logger.error("JSON write fallback used | target=%s | recovery=%s | error=%s", target, recovery, last_error)
     return recovery
