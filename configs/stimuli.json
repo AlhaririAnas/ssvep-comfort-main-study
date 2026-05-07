@@ -1,0 +1,151 @@
+[
+  {
+    "id": 1,
+    "name": "SSVEP Flicker Circle",
+    "type": "ssvep",
+    "shape": "flicker",
+    "duration": 5.0,
+    "freq": 12.0,
+    "size_deg": 5.0
+  },
+  {
+    "id": 2,
+    "name": "SSVEP Pattern-Reversal Checkerboard",
+    "type": "ssvep",
+    "shape": "checkerboard",
+    "duration": 5.0,
+    "freq": 12.0,
+    "size_deg": 5.0,
+    "checks_per_row": 8
+  },
+  {
+    "id": 3,
+    "name": "SSVEP Concentric Rings",
+    "type": "ssvep",
+    "shape": "circle_rings",
+    "duration": 5.0,
+    "freq": 12.0,
+    "size_deg": 5.0,
+    "n_rings": 4
+  },
+  {
+    "id": 4,
+    "name": "SSVEP Radial Spokes",
+    "type": "ssvep",
+    "shape": "spokes",
+    "duration": 5.0,
+    "freq": 12.0,
+    "size_deg": 5.0,
+    "n_spokes": 8
+  },
+  {
+    "id": 5,
+    "name": "SSVEP Image Alternation",
+    "type": "ssvep",
+    "shape": "image_alternation",
+    "duration": 5.0,
+    "freq": 12.0,
+    "size_deg": 5.0,
+    "image_a": "./images/emoji_A.png"
+  },
+  {
+    "id": 6,
+    "name": "SSMVEP Radial Zoom",
+    "type": "ssmvep",
+    "shape": "radial_zoom",
+    "duration": 5.0,
+    "freq": 12.0,
+    "size_min_deg": 3.6,
+    "size_max_deg": 5.2
+  },
+  {
+    "id": 7,
+    "name": "SSMVEP Rotation",
+    "type": "ssmvep",
+    "shape": "rotation",
+    "duration": 5.0,
+    "freq": 12.0,
+    "size_deg": 5.0,
+    "n_spokes": 8,
+    "angle_step_deg": 22.5
+  },
+  {
+    "id": 8,
+    "name": "SSMVEP Newton Rings",
+    "type": "ssmvep",
+    "shape": "newtons_rings",
+    "duration": 5.0,
+    "freq": 12.0,
+    "size_deg": 5.0,
+    "n_rings": 4
+  },
+  {
+    "id": 9,
+    "name": "Hybrid Zoom Chromatic Flicker",
+    "type": "hybrid",
+    "shape": "zoom_chromatic_flicker",
+    "duration": 5.0,
+    "freq": 12.0,
+    "size_min_deg": 3.6,
+    "size_max_deg": 5.2
+  },
+  {
+    "id": 10,
+    "name": "Hybrid Rotation Center Flicker",
+    "type": "hybrid",
+    "shape": "rotation_center_flicker",
+    "duration": 5.0,
+    "freq": 12.0,
+    "size_deg": 5.0,
+    "n_spokes": 8,
+    "angle_step_deg": 22.5,
+    "center_radius_deg": 1.0
+  },
+  {
+    "id": 11,
+    "name": "Hybrid Chromatic Morph",
+    "type": "hybrid",
+    "shape": "chromatic_morph_hybrid",
+    "duration": 5.0,
+    "freq": 12.0,
+    "size_deg": 5.0
+  },
+  {
+    "id": 12,
+    "name": "Hybrid Oscillating Pattern-Reversal Checkerboard",
+    "type": "hybrid",
+    "shape": "oscillating_prs",
+    "duration": 5.0,
+    "freq": 12.0,
+    "size_deg": 5.0,
+    "position_shift_deg": 0.25,
+    "checks_per_row": 8
+  },
+  {
+    "id": 13,
+    "name": "Hybrid Center Surround",
+    "type": "hybrid",
+    "shape": "center_surround",
+    "duration": 5.0,
+    "freq": 12.0,
+    "center_radius_deg": 1.0,
+    "surround_min_deg": 2.0,
+    "surround_max_deg": 2.5
+  },
+  {
+    "id": 15,
+    "name": "SSVEP Pattern-Reversal Checkerboard Spiral",
+    "type": "ssvep",
+    "shape": "checkerboard_v2",
+    "duration": 5.0,
+    "freq": 12.0,
+    "size_deg": 5.0,
+    "n_radial": 14,
+    "n_angular": 20,
+    "spiral_twist": 0.8,
+    "spiral_depth": 0.8,
+    "min_radius_frac": 0.01,
+    "tex_size": 1024,
+    "edge_sigma_px": 0.0
+  }
+]
