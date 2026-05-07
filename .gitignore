@@ -17,17 +17,7 @@ figures/
 test-output/
 
 # Study data
-data/*
-!data/.gitkeep
-!data/raw/
-!data/processed/
-!data/external/
-data/raw/*
-data/processed/*
-data/external/*
-!data/raw/.gitkeep
-!data/processed/.gitkeep
-!data/external/.gitkeep
+data/
 
 # OS and editor noise
 .DS_Store
