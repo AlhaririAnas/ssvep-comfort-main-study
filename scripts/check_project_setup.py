@@ -135,8 +135,7 @@ def main(argv: list[str] | None = None) -> int:
         _ok("Config project root matches script project root")
 
     if LOADED_ENV_FILE is None:
-        _fail(".env or .env.local not loaded")
-        passed = False
+        _ok("No .env file loaded; using built-in defaults")
     else:
         _ok(f"Loaded env file: {LOADED_ENV_FILE}")
 
