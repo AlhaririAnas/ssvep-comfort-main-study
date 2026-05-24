@@ -64,7 +64,6 @@ import ssl
 import time
 import json
 from datetime import datetime
-from pathlib import Path
 
 # ---------------------------------------------------------------------------
 # JSON-RPC request ID constants
@@ -103,6 +102,7 @@ SYNC_WITH_HEADSET_CLOCK_ID          =   28
 # ---------------------------------------------------------------------------
 # Error codes
 # ---------------------------------------------------------------------------
+ERR_SESSION_DOES_NOT_EXIST = -32007
 ERR_PROFILE_ACCESS_DENIED = -32046
 
 # ---------------------------------------------------------------------------
@@ -164,7 +164,7 @@ class Cortex(Dispatcher):
                 'warn_record_post_processing_done', 'query_records_done', 'request_download_records_done',
                 'inject_marker_done', 'update_marker_done', 'export_record_done', 'headset_connected', 'headset_disconnected', 'new_data_labels', 
                 'new_com_data', 'new_fe_data', 'new_eeg_data', 'new_mot_data', 'new_dev_data', 
-                'new_met_data', 'new_pow_data', 'new_sys_data', 'sync_with_headset_clock_done']
+                'new_met_data', 'new_pow_data', 'new_sys_data', 'sync_with_headset_clock_done', 'closed']
     def __init__(self, client_id, client_secret, debug_mode=False, **kwargs):
         """
         Initialize a Cortex instance with authentication and configuration options.
@@ -191,6 +191,7 @@ class Cortex(Dispatcher):
         self.license = ''
         self.isHeadsetConnected = False
         self.auto_create_session = True
+        self._closing = False
 
         if client_id == '':
             raise ValueError('Empty your_app_client_id. Please fill in your_app_client_id before running the example.')
@@ -215,44 +216,53 @@ class Cortex(Dispatcher):
 
     def open(self):
         """
-        Connect to Cortex and block until the WebSocket session ends.
+        Connect to Cortex and keep reconnecting after unexpected socket loss.
 
         Opens the WebSocket to wss://localhost:6868, which triggers
         ``on_open`` -> ``do_prepare_steps()`` to start the auth handshake.
-        The call blocks because the worker thread is joined - callers
+        The call blocks because each worker thread is joined - callers
         should run this in a background daemon thread so the main thread
-        remains free for the experiment loop.
+        remains free for the experiment loop. If the socket closes without
+        an explicit ``close()``, a fresh WebSocket is opened after a short
+        delay so a paused experiment can recover.
         """
         url = "wss://localhost:6868"
-        # websocket.enableTrace(True)
-        self.ws = websocket.WebSocketApp(url, 
-                                        on_message=self.on_message,
-                                        on_open = self.on_open,
-                                        on_error=self.on_error,
-                                        on_close=self.on_close)
-        thread_name = "WebsockThread:-{:%Y%m%d%H%M%S}".format(datetime.now())
-        
+
         # As default, a Emotiv self-signed certificate is required.
-        # If you don't want to use the certificate, please replace by the below line  by sslopt={"cert_reqs": ssl.CERT_NONE}
-        file_dir_path = Path(__file__).resolve().parent
-        parent_dir_path = file_dir_path.parent
-        
-        certificate_path = Path(parent_dir_path, 'certificates', 'rootCA.pem')
+        # If you don't want to use the certificate, please replace by the below line
+        # by sslopt={"cert_reqs": ssl.CERT_NONE}
         sslopt = {"cert_reqs": ssl.CERT_NONE} 
+        self._closing = False
 
-        self.websock_thread = threading.Thread(
-            target=self.ws.run_forever, 
-            args=(None, sslopt), 
-            name=thread_name
-        )
+        while not self._closing:
+            # websocket.enableTrace(True)
+            self.ws = websocket.WebSocketApp(
+                url,
+                on_message=self.on_message,
+                on_open=self.on_open,
+                on_error=self.on_error,
+                on_close=self.on_close,
+            )
+            thread_name = "WebsockThread:-{:%Y%m%d%H%M%S}".format(datetime.now())
 
-        self.websock_thread  = threading.Thread(target=self.ws.run_forever, args=(None, sslopt), name=thread_name)
-        self.websock_thread .start()
-        self.websock_thread.join()
+            self.websock_thread = threading.Thread(
+                target=self.ws.run_forever,
+                args=(None, sslopt),
+                name=thread_name,
+            )
+            self.websock_thread.start()
+            self.websock_thread.join()
+
+            if self._closing:
+                break
+
+            print("websocket closed unexpectedly - reconnecting in 2 seconds")
+            time.sleep(2.0)
 
     def close(self):
         self._closing = True
-        self.ws.close()
+        if getattr(self, "ws", None) is not None:
+            self.ws.close()
 
     def set_wanted_headset(self, headset_id):
         self.headset_id = headset_id
@@ -273,6 +283,7 @@ class Cortex(Dispatcher):
         if len(args) > 1:
             print(args[1])
         self.isHeadsetConnected = False
+        self.session_id = ''
         if getattr(self, "_closing", False):
             self.emit('closed', data={"source": "websocket_close", "args": args})
             return
@@ -524,7 +535,10 @@ class Cortex(Dispatcher):
     def handle_error(self, recv_dic):
         req_id = recv_dic['id']
         print('handle_error: request Id ' + str(req_id))
-        self.emit('inform_error', error_data=recv_dic['error'])
+        error_data = recv_dic['error']
+        if error_data.get('code') == ERR_SESSION_DOES_NOT_EXIST:
+            self.session_id = ''
+        self.emit('inform_error', error_data=error_data)
     
     def handle_warning(self, warning_dic):
         if self.debug:
@@ -547,6 +561,7 @@ class Cortex(Dispatcher):
             HEADSET_DISCONNECTED_TIMEOUT: self._handle_headset_disconnected,
             CORTEX_AUTO_UNLOAD_PROFILE: self._handle_cortex_auto_unload_profile,
             CORTEX_STOP_ALL_STREAMS: self._handle_cortex_stop_all_streams,
+            CORTEX_CLOSE_SESSION: self._handle_cortex_close_session,
             CORTEX_RECORD_POST_PROCESSING_DONE: self._handle_cortex_record_post_processing_done,
             HEADSET_SCANNING_FINISHED: self._handle_headset_scanning_finished,
         }
@@ -574,6 +589,11 @@ class Cortex(Dispatcher):
         session_id = warning_msg['sessionId']
         if session_id == self.session_id:
             self.emit('warn_cortex_stop_all_sub', data=session_id)
+            self.session_id = ''
+
+    def _handle_cortex_close_session(self, warning_msg):
+        session_id = warning_msg.get('sessionId') if isinstance(warning_msg, dict) else None
+        if session_id is None or session_id == self.session_id:
             self.session_id = ''
 
     def _handle_cortex_record_post_processing_done(self, warning_msg):
@@ -742,6 +762,7 @@ class Cortex(Dispatcher):
     def create_session(self):
         if self.session_id != '':
             warnings.warn("There is existed session " + self.session_id)
+            self.emit('create_session_done', data=self.session_id)
             return
 
         print('create session --------------------------------')

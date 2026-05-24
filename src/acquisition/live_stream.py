@@ -192,6 +192,7 @@ class CortexLiveStream:
             new_dev_data=self._on_dev_data,
             new_sys_data=self._on_sys_data,
             inform_error=self._on_error,
+            create_session_done=self._on_create_session_done,
         )
 
     def start(self, wait_labels_s: float = 10.0) -> None:
@@ -359,6 +360,16 @@ class CortexLiveStream:
 
     def _on_error(self, *args, **kwargs) -> None:
         self.log.error("Live stream Cortex error | %s", kwargs.get("error_data"))
+
+    def _on_create_session_done(self, *args, **kwargs) -> None:
+        if not self._started:
+            return
+        self._labels_ready.clear()
+        self.log.warning("Live stream session recreated. Re-subscribing streams.")
+        try:
+            self.marker.c.sub_request(self.streams)
+        except Exception:
+            self.log.exception("Live stream re-subscribe failed")
 
 
 if __name__ == "__main__":

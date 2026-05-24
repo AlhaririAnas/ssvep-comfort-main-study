@@ -74,6 +74,9 @@ def recover_after_disconnect(
     run_log.error("Headset connection lost. Waiting for reconnection.")
 
     while not marker.wait_for_headset_reconnected(timeout=1.0):
+        probe = getattr(marker, "request_reconnect_probe", None)
+        if probe is not None:
+            probe()
         show_recovery_message(
             win,
             info_stim,
@@ -90,6 +93,9 @@ def recover_after_disconnect(
         "Checking signal quality before the trial is repeated ...",
     )
     run_log.warning("Headset reconnected. Re-syncing marker clock.")
+    wait_for_session = getattr(marker, "wait_for_session", None)
+    if wait_for_session is not None and not wait_for_session(timeout=30.0):
+        raise RuntimeError("Headset reconnected, but the Cortex session was not ready again.")
     try:
         marker.resync_clock(timeout=10.0)
     except Exception:
