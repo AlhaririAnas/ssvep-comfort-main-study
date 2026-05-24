@@ -385,6 +385,15 @@ class Marker:
 
         return self._headset_connected.wait(timeout=timeout)
 
+    def request_reconnect_probe(self) -> None:
+        """Ask Cortex to refresh the headset state while recovery is waiting."""
+
+        try:
+            self.c.refresh_headset_list()
+            self.c.query_headset()
+        except Exception:
+            logger.exception("[Marker] Reconnect probe failed.")
+
     # ------------------------------------------------------------------
     # Public API - clock
     # ------------------------------------------------------------------
@@ -561,6 +570,7 @@ class Marker:
     # ------------------------------------------------------------------
     def _on_create_session_done(self, *args, **kwargs) -> None:
         logger.info("[Marker] Session created -> syncing headset clock ...")
+        self._headset_connected.set()
         self.c.sync_with_headset_clock()
 
     def _on_sync_with_headset_clock_done(self, *args, **kwargs) -> None:
@@ -624,6 +634,7 @@ class Marker:
 
     def _on_headset_disconnected(self, *args, **kwargs) -> None:
         self._headset_connected.clear()
+        self._session_ready.clear()
         logger.error("[Marker] Headset disconnected: %s", kwargs.get("data"))
 
     def _on_stream_data(self, *args, **kwargs) -> None:

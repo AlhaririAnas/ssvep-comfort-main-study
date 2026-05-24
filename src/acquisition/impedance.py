@@ -111,6 +111,7 @@ class ImpedanceMonitor:
         self.client.bind(
             new_dev_data=self._on_dev_data,
             new_data_labels=self._on_labels,
+            create_session_done=self._on_create_session_done,
         )
         self._bound = True
         try:
@@ -167,6 +168,15 @@ class ImpedanceMonitor:
                     self._last_battery = float(data["batteryPercent"])
                 except (TypeError, ValueError):
                     pass
+
+    def _on_create_session_done(self, *args: Any, **kwargs: Any) -> None:
+        if not self._bound:
+            return
+        self.log.warning("Impedance monitor session recreated. Re-subscribing dev stream.")
+        try:
+            self.client.sub_request(["dev"])
+        except Exception:
+            self.log.exception("Cortex dev re-subscribe failed")
 
     # --- snapshot --------------------------------------------------------
 
